@@ -1,0 +1,7 @@
+.rebar/
+deps/
+ebin/
+log/
+
+*.log
+erl_crash.dump

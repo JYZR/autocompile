@@ -1,0 +1,14 @@
+{ application
+, autocompile
+, [ {description, ""}
+  , {vsn, "0.1.0"}
+  , {registered, []}
+  , {applications, [ kernel
+                   , stdlib
+                   , lager
+                   , fs
+                   ]}
+  , {mod, { autocompile_app, []}}
+  , {env, []}
+  ]
+}.
