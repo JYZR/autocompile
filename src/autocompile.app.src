@@ -5,10 +5,12 @@
   , {registered, []}
   , {applications, [ kernel
                    , stdlib
-                   , lager
                    , fs
                    ]}
   , {mod, { autocompile_app, []}}
-  , {env, []}
+  , {env, [ {debug, false}
+          , {info, true}
+          , {error, true}
+          ]}
   ]
 }.

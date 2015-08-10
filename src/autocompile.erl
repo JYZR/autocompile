@@ -50,37 +50,37 @@ start_link() ->
 
 init(_Args) ->
     fs:subscribe(),
-    lager:info("Started"),
+    p_info("Started"),
     {ok, #state{}}.
 
 handle_call(Msg, _From, State) ->
-    lager:error("Unexpected call: ~p", [Msg]),
+    p_error("Unexpected call: ~p", [Msg]),
     {reply, {error, unexpected_call}, State}.
 
 handle_cast(Msg, State) ->
-    lager:error("Unexpected cast: ~p", [Msg]),
+    p_error("Unexpected cast: ~p", [Msg]),
     {noreply, State}.
 
 handle_info({_, {fs, file_event}, {Path, Events}}, State) ->
-    lager:debug("File: ~s\n"
+    p_debug("File: ~s\n"
                 "Events: ~p", [Path, Events]),
     case lists:member(modified, Events) of
         true ->
-            lager:debug("File ~s was modified", [Path]),
+            p_debug("File ~s was modified", [Path]),
             is_erl_file(Path) andalso recompile(Path);
         false -> ok
     end,
    {noreply, State};
 
 handle_info(Msg, State) ->
-    lager:error("Unexpected message: ~p", [Msg]),
+    p_error("Unexpected message: ~p", [Msg]),
     {noreply, State}.
 
 terminate(Reason,  _State) ->
-    lager:info("terminate: ~p", [Reason]).
+    p_info("terminate: ~p", [Reason]).
 
 code_change(_OldVsn, State, _Extra) ->
-    lager:info("code_change"),
+    p_info("code_change"),
     {ok, State}.
 
 %%%=============================================================================
@@ -94,20 +94,23 @@ recompile(Path) ->
     {LibDir, ModuleName} = extract_lib_dir_and_module_name(Path),
     Module = list_to_atom(ModuleName),
     CO = get_prev_compile_options(Module),
-    lager:debug("Recompiling module ~w", [Module]),
-    CO2 = kw_replace(outdir, filename:join(LibDir, "ebin"), CO),
-    lager:debug("Compile options: ~p", [CO2]),
-    case c:c(Path, CO2) of
+    p_debug("Recompiling module ~w", [Module]),
+    {ok, TopDir} = file:get_cwd(),
+    c:cd(LibDir),
+    p_debug("Compile options: ~p", [CO]),
+    case c:c(Path, CO) of
         {ok, Module} ->
-            lager:info("Module ~w was sucessfully recompiled", [Module]),
+            p_info("Module ~w was sucessfully recompiled", [Module]),
+            c:cd(TopDir),
             ok;
         error ->
-            lager:info("Module ~w could not be compiled", [Module]),
+            p_info("Module ~w could not be compiled", [Module]),
+            c:cd(TopDir),
             error
     end.
 
 extract_lib_dir_and_module_name(Path) ->
-    {ok, RE} = re:compile("(.*)/src/([\\w\\d]+)\\.erl"),
+    {ok, RE} = re:compile("(.*)/(?:src|test)/([\\w\\d]+)\\.erl"),
     {match, Matches} = re:run(Path, RE),
     [ {0, _}
     , {LibDirStart, LibDirLength}
@@ -127,6 +130,50 @@ kw_get(Key, Proplist) ->
         none -> none
     end.
 
-kw_replace(Key, Value, Proplist) ->
-    [{Key, Value} | proplists:delete(Key, Proplist)].
+p_debug(Format) ->
+    case application:get_env(autocompile, debug) of
+        {ok, true} ->
+            io:format("[autocompile] [debug]: " ++ Format ++ "\n");
+        _ ->
+            ok
+    end.
 
+p_debug(Format, Data) ->
+    case application:get_env(autocompile, debug) of
+        {ok, true} ->
+            io:format("[autocompile] [debug]: " ++ Format ++ "\n", Data);
+        _ ->
+            ok
+    end.
+
+p_info(Format) ->
+    case application:get_env(autocompile, info) of
+        {ok, true} ->
+            io:format("[autocompile] [info]: " ++ Format ++ "\n");
+        _ ->
+            ok
+    end.
+
+p_info(Format, Data) ->
+    case application:get_env(autocompile, info) of
+        {ok, true} ->
+            io:format("[autocompile] [info]: " ++ Format ++ "\n", Data);
+        _ ->
+            ok
+    end.
+
+p_error(Format) ->
+    case application:get_env(autocompile, error) of
+        {ok, true} ->
+            io:format("[autocompile] [error]: " ++ Format ++ "\n");
+        _ ->
+            ok
+    end.
+
+p_error(Format, Data) ->
+    case application:get_env(autocompile, error) of
+        {ok, true} ->
+            io:format("[autocompile] [error]: " ++ Format ++ "\n", Data);
+        _ ->
+            ok
+    end.
