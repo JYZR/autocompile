@@ -100,7 +100,7 @@ recompile(Path) ->
     p_debug("Compile options: ~p", [CO]),
     case c:c(Path, CO) of
         {ok, Module} ->
-            p_info("Module ~w was sucessfully recompiled", [Module]),
+            p_info("Module ~w was successfully recompiled", [Module]),
             c:cd(TopDir),
             ok;
         error ->
