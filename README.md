@@ -5,7 +5,7 @@
 Just start the application and it will watch for file modifications in your current directory.
 Modules will be recompiled with the same compile options.
 
-```
+```erlang
 application:ensure_all_started(autocompile).
 ```
 
@@ -35,7 +35,7 @@ Then add the `lib` directory to the environment variable `ERL_LIBS`.
 
 `~/erl_libs/rebar.config`:
 
-```
+```erlang
 {deps_dir, "lib"}.
 
 { deps
@@ -53,7 +53,7 @@ rebar get-deps compile
 
 Set `ERL_LIBS`:
 
-```
+```bash
 if [ -z $ERL_LIBS ]; then
     export ERL_LIBS=~/erl_libs/lib
 else
@@ -67,7 +67,7 @@ If you don't always want to start it, check the node name first.
 
 `~/.erlang`:
 
-```
+```erlang
 case node() of
   my_node@localhost -> application:ensure_all_started(autocompile);
   _                 -> ok
