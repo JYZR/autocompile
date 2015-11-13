@@ -74,6 +74,21 @@ case node() of
 end.
 ```
 
+## First Aid
+
+### `inotify` watches limit [Linux]
+
+```
+Failed to watch /home/jyzr/my_app; upper limit on inotify watches reached!
+Please increase the amount of inotify watches allowed per user via '/proc/sys/fs/inotify/max_user_watches'.
+```
+
+**How to increase the value:**
+
+```
+sudo sysctl fs.inotify.max_user_watches=32768
+```
+
 <!-- Links -->
 
 [code-path]:  http://www.erlang.org/doc/man/code.html#id104169
