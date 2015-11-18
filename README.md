@@ -85,8 +85,18 @@ Please increase the amount of inotify watches allowed per user via '/proc/sys/fs
 
 **How to increase the value:**
 
-```
+*Temporary:*
+
+```console
 sudo sysctl fs.inotify.max_user_watches=32768
+```
+
+*Permanent:*
+
+Add a line to `/etc/sysctl.conf`:
+
+```
+fs.inotify.max_user_watches=32768
 ```
 
 <!-- Links -->
